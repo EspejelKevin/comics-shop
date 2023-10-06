@@ -4,3 +4,4 @@ from .usecases.login_usecase import LoginUsecase
 from .usecases.readiness_usecase import ReadinessUsecase
 from .usecases.signup_usecase import SignupUsecase
 from .usecases.update_cache_usecase import UpdateCacheUsecase
+from .usecases.validate_token_usecase import ValidateTokenUsecase

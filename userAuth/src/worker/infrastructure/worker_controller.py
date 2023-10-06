@@ -37,3 +37,11 @@ class WorkerController:
             use_case: SignupUsecase = app.use_cases.login()
             data = use_case.execute(user)
             return WorkerResponse(content=data)
+
+    @staticmethod
+    @autodynatrace.trace('WorkerController - keys')
+    def keys(token: str):
+        with container.SingletonContainer.scope() as app:
+            use_case: SignupUsecase = app.use_cases.keys()
+            data = use_case.execute(token)
+            return WorkerResponse(content=data)

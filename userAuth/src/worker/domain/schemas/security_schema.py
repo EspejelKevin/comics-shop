@@ -1,6 +1,6 @@
 import datetime
 
-from jose import jwt
+from jose import jws, jwt
 from shared.infrastructure import get_settings
 
 settings = get_settings()
@@ -21,3 +21,6 @@ class SecuritySchema:
             "exp": expire
         }
         return jwt.encode(to_encode, self.__secret_key, self.__algorithm)
+
+    def decode_access_token(self, token: str) -> bytes:
+        return jws.verify(token, self.__secret_key, self.__algorithm)

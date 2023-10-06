@@ -1,5 +1,6 @@
 import autodynatrace
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from shared.infrastructure import HttpResponse
 from shared.infrastructure.settings import get_settings
 from worker.domain import UserLogin, UserRegistration
@@ -15,7 +16,8 @@ descriptions = {
     'liveness': 'Verifica que el servicio se encuentre disponible.',
     'readiness': 'Verifica que existan conexiones activas a MONGO/REDIS/FIREBASE.',
     'signup': 'Registra un nuevo usuario en base de datos.',
-    'login': 'Verifica si un usuario existe en base de datos.'
+    'login': 'Verifica si un usuario existe en base de datos.',
+    'keys': 'Valida si el token es correcto y retorna el payload'
 }
 
 router = APIRouter(prefix=prefix)
@@ -47,3 +49,11 @@ def signup(user: UserRegistration) -> HttpResponse:
 @autodynatrace.trace(f'{prefix}/login')
 def login(user: UserLogin) -> HttpResponse:
     return WorkerController.login(user)
+
+
+@router.get('/keys', tags=['Auth'],
+            summary=descriptions['keys'])
+@autodynatrace.trace(f'{prefix}/keys')
+def keys(authorization: HTTPAuthorizationCredentials = Depends(HTTPBearer())) -> HttpResponse:
+    token = authorization.credentials
+    return WorkerController.keys(token)
