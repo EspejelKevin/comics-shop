@@ -6,7 +6,7 @@ from shared.domain import Response, SuccessResponse
 from shared.infrastructure import ErrorResponse, Log, Measurement, Settings
 from shared.utils import Utils
 from worker.application import Functionalities
-from worker.domain import DBRepository, UserInput
+from worker.domain import DBRepository, UserRegistration
 
 
 class SignupUsecase(Functionalities):
@@ -17,7 +17,7 @@ class SignupUsecase(Functionalities):
         self.settings = settings
         self.transaction_id = str(uuid.uuid4())
 
-    def execute(self, user: UserInput) -> Response:
+    def execute(self, user: UserRegistration) -> Response:
         init_time = time.perf_counter()
         self._set_logs()
 
@@ -34,7 +34,7 @@ class SignupUsecase(Functionalities):
         data = {'message': f'Usuario {user.username} creado con éxito'}
         return SuccessResponse(data, 200, self.transaction_id, time_elapsed)
 
-    def _get_response(self, user: UserInput) -> None:
+    def _get_response(self, user: UserRegistration) -> None:
         method_name = Utils.get_method_name(self, '_get_response')
         existing_user = self.__db_service.get_user(user.username)
 

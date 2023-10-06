@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     ENABLE_DOCS: bool = False
     PORT: int = 8000
     RELOAD: bool = False
+    SECRET_KEY: str
+    ALGORITHM: str
     # Mongo
     MONGO_URI: str
     MONGO_DB_NAME: str = 'configuraciones_appcom'

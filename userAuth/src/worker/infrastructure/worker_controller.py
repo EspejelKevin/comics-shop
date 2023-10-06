@@ -3,7 +3,7 @@ import container
 from shared.infrastructure import WorkerResponse
 from worker.application import (ReadinessUsecase, SignupUsecase,
                                 UpdateCacheUsecase)
-from worker.domain import UserInput
+from worker.domain import UserLogin, UserRegistration
 
 
 class WorkerController:
@@ -24,8 +24,16 @@ class WorkerController:
 
     @staticmethod
     @autodynatrace.trace('WorkerController - signup')
-    def signup(user: UserInput):
+    def signup(user: UserRegistration):
         with container.SingletonContainer.scope() as app:
             use_case: SignupUsecase = app.use_cases.signup()
+            data = use_case.execute(user)
+            return WorkerResponse(content=data)
+
+    @staticmethod
+    @autodynatrace.trace('WorkerController - login')
+    def login(user: UserLogin):
+        with container.SingletonContainer.scope() as app:
+            use_case: SignupUsecase = app.use_cases.login()
             data = use_case.execute(user)
             return WorkerResponse(content=data)

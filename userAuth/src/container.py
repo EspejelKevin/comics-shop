@@ -3,8 +3,9 @@ from typing import Optional
 
 from dependency_injector import containers, providers
 from shared.infrastructure import Log, MongoDatabase, Settings
-from worker.application import (DBWorkerService, ReadinessUsecase,
-                                SignupUsecase, UpdateCacheUsecase)
+from worker.application import (DBWorkerService, LoginUsecase,
+                                ReadinessUsecase, SignupUsecase,
+                                UpdateCacheUsecase)
 from worker.infrastructure import MongoWorkerRepository
 
 
@@ -39,6 +40,9 @@ class UseCasesContainer(containers.DeclarativeContainer):
         log=log, settings=settings)
     signup = providers.Factory(
         SignupUsecase, db_worker_service=services.db_worker_service,
+        log=log, settings=settings)
+    login = providers.Factory(
+        LoginUsecase, db_worker_service=services.db_worker_service,
         log=log, settings=settings)
 
 
