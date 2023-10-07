@@ -31,11 +31,11 @@ class LoginUsecase(Functionalities):
         time_elapsed = Utils.get_time_elapsed_ms(init_time)
         self._log.info('Login: successfully')
 
-        data = {
+        response = {
             'message': f'Usuario {user.username} logueado con éxito',
             'token': token
         }
-        return SuccessResponse(data, 200, self.transaction_id, time_elapsed)
+        return SuccessResponse(response, 200, self.transaction_id, time_elapsed)
 
     def _get_response(self, user: UserLogin) -> str:
         method_name = Utils.get_method_name(self, '_get_response')
