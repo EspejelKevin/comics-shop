@@ -49,7 +49,7 @@ class MongoWorkerRepository(DBRepository):
 
             if not results or not results.get('errors'):
                 measurement = Measurement('MongoDB', time_elapsed)
-                log.error('Mongo: Get List of Error Details',
+                log.error(f'Mongo: Get List of Error Details {settings.MONGO_DB_NAME} {settings.MONGO_URI}',
                           method=method_name, error=self.document_error,
                           object=document_id, measurement=measurement)
                 return {}
@@ -64,7 +64,7 @@ class MongoWorkerRepository(DBRepository):
         init_time = time.perf_counter()
 
         with self.session_factory() as session:
-            db = session.get_db(db_name='movie_store_users')
+            db = session.get_db(db_name=settings.MONGO_DB_NAME)
             collection = db.users
             query = {'username': username}
             result = collection.find_one(query)
@@ -81,7 +81,7 @@ class MongoWorkerRepository(DBRepository):
         init_time = time.perf_counter()
 
         with self.session_factory() as session:
-            db = session.get_db(db_name='movie_store_users')
+            db = session.get_db(db_name=settings.MONGO_DB_NAME)
             collection = db.users
             result = collection.insert_one(user_data)
 

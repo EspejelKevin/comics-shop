@@ -1,0 +1,45 @@
+version: '3.1'
+
+services:
+  userauth:
+    build:
+      context: userauth
+      dockerfile: dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodev
+    environment:
+      - MONGO_URI=mongodb://mongodev:27017/?retryWrites=true&w=majority
+  comicdetails:
+    build:
+      context: comicdetails
+      dockerfile: dockerfile
+    ports:
+      - "8002:8002"
+    depends_on:
+      - mongodev
+    environment:
+      - MONGO_URI=mongodb://mongodev:27017/?retryWrites=true&w=majority
+  layaway:
+    build:
+      context: layaway
+      dockerfile: dockerfile
+    ports:
+      - "8001:8001"
+    depends_on:
+      - mongodev
+    environment:
+      - MONGO_URI=mongodb://mongodev:27017/?retryWrites=true&w=majority
+  mongodev:
+    restart: always
+    image: mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - 'mongodata:/data/mongodata'
+    command:
+      mongod --quiet --logpath /dev/null
+
+volumes:
+  mongodata:

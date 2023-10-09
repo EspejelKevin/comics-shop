@@ -8,10 +8,10 @@ from shared.infrastructure import (ErrorResponse, GeneralRequestServer, Log,
                                    Measurement, Settings)
 from shared.utils import Utils
 from worker.application import Functionalities
-from worker.domain import ComicInput, DBRepository
+from worker.domain import DBRepository, Filter
 
 
-class RelatedComicsUsecase(Functionalities):
+class GetRelatedComicsUsecase(Functionalities):
     def __init__(self, db_worker_service: DBRepository, log: Log,
                  settings: Settings) -> None:
         self.__db_service = db_worker_service
@@ -20,30 +20,27 @@ class RelatedComicsUsecase(Functionalities):
         self.transaction_id = str(uuid.uuid4())
         self._general_request = GeneralRequestServer()
 
-    def execute(self, comic_input: ComicInput, token: str) -> Response:
+    def execute(self, filter: Filter, token: str) -> Response:
         init_time = time.perf_counter()
         self._set_logs()
 
-        self._log.info('Start: Related Comics Usecase',
-                       object=comic_input.dict())
+        self._log.info('Start: Get Related Comics Usecase',
+                       object=filter.dict())
 
         self._set_configs(self.__db_service)
 
-        message = self._get_response(comic_input, token)
-        response = {'message': message}
+        response = self._get_response(filter, token)
 
         time_elapsed = Utils.get_time_elapsed_ms(init_time)
-        self._log.info('RelatedComics: successfully')
+        self._log.info('GetRelatedComics: successfully')
 
-        return SuccessResponse(response, 201, self.transaction_id, time_elapsed)
+        return SuccessResponse(response, 200, self.transaction_id, time_elapsed)
 
-    def _get_response(self, comic_input: ComicInput, token: str) -> str:
+    def _get_response(self, filter: Filter, token: str) -> dict:
         method_name = Utils.get_method_name(self, '_get_response')
-        comic_id = comic_input.id
         user = self._validate_token(token)
-        comic = self._get_comic_to_link(comic_id)
         user_id = user.get('id')
-        username = user.get('username')
+        layaway = {'user_id': user_id, 'comics': []}
 
         user_comics = self.__db_service.get_user_comics(user_id)
 
@@ -51,18 +48,19 @@ class RelatedComicsUsecase(Functionalities):
             self._create_measurement(
                 'MongoDB', 'Failed to get comics from Mongo', 'Mongo is not up', method_name)
             raise ErrorResponse(**self._error_attributes(100))
-        elif list(filter(lambda user_comic: user_comic.get('id') == comic_id, user_comics)):
-            self._create_measurement(
-                'layaway', f'{username} has this comic {comic_id}', 'Error conflict', method_name)
-            raise ErrorResponse(**self._error_attributes(1600))
+        elif not user_comics:
+            return layaway
 
-        was_inserted = self.__db_service.insert_comic_to_link(user_id, comic)
-        if was_inserted is None or was_inserted < 1:
-            self._create_measurement(
-                'MongoDB', 'Failed to insert comic in Mongo', 'Mongo is not up or query bad', method_name)
-            raise ErrorResponse(**self._error_attributes(100))
+        if filter.alphabetically:
+            user_comics = sorted(user_comics,
+                                 key=lambda item: item['title'])
+        if filter.date:
+            user_comics = sorted(user_comics,
+                                 key=lambda item: item['on_sale_date'])
 
-        return f'El usuario {username} tiene el comic {comic_id} en su apartado'
+        layaway['comics'] = user_comics
+
+        return layaway
 
     def _validate_token(self, token: str) -> dict:
         url = self.settings.URL_LOGIN_KEY
@@ -80,22 +78,6 @@ class RelatedComicsUsecase(Functionalities):
             raise ErrorResponse(**self._error_attributes(104), details=details)
 
         return response['response']['data']['payload']
-
-    def _get_comic_to_link(self, comic_id: int) -> dict:
-        url = f'{self.settings.URL_GET_COMIC_BY_ID}/{comic_id}'
-        coroutine = self._general_request.get(url=url)
-        response = asyncio.run(coroutine)
-
-        if not response['response']:
-            if response['type_error'] == 'timeout':
-                raise ErrorResponse(**self._error_attributes(103))
-            raise ErrorResponse(**self._error_attributes(102))
-
-        if response['status'] == 404:
-            details = ['comic does not exit']
-            raise ErrorResponse(**self._error_attributes(107), details=details)
-
-        return response['response']['data']['comic']
 
     def _create_measurement(self, service: str, message: str, error: str, method_name: str) -> None:
         init_time = time.perf_counter()

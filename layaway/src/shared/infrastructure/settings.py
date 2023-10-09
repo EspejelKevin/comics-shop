@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     # Mongo
     MONGO_URI: str
-    MONGO_DB_NAME: str = 'configuraciones_appcom'
+    MONGO_DB_NAME: str = 'comic_shop'
     MONGO_TIMEOUT_MS: int = 500
     MONGO_MAX_POOL_SIZE: int = 20
     MONGO_ID_ERROR_DETAILS: str = 'errorDetails'

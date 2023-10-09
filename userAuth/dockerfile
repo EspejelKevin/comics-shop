@@ -1,11 +1,24 @@
 FROM python:3.11-slim-buster
 
-COPY . /
+WORKDIR /userAuth
+
+COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
+COPY . .
+
 ENV AUTODYNATRACE_CAPTURE_HEADERS=True
 ENV AUTOWRAPT_BOOTSTRAP=autodynatrace
+ENV SERVICE_NAME=userAuth
+ENV NAMESPACE=users
+ENV API_VERSION=v1
+ENV IMAGE_VERSION=v1
+ENV ENABLE_DOCS=true
+ENV RELOAD=true
+ENV DEVELOPER_PORTAL_HTTP_ERRORS=https://coppel-developer-app.com/errors
+ENV SECRET_KEY=algo-super-hiper-mega-secretisimo-legalisimo
+ENV ALGORITHM=HS256
 ENV TZ=America/Mexico_City
 
 EXPOSE 8000

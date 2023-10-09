@@ -32,7 +32,7 @@ class SignupUsecase(Functionalities):
         self._log.info('Signup: successfully')
 
         data = {'message': f'Usuario {user.username} creado con éxito'}
-        return SuccessResponse(data, 200, self.transaction_id, time_elapsed)
+        return SuccessResponse(data, 201, self.transaction_id, time_elapsed)
 
     def _get_response(self, user: UserRegistration) -> None:
         method_name = Utils.get_method_name(self, '_get_response')

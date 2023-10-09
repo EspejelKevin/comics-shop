@@ -64,7 +64,7 @@ class MongoWorkerRepository(DBRepository):
         init_time = time.perf_counter()
 
         with self.session_factory() as session:
-            db = session.get_db(db_name='movie_store_users')
+            db = session.get_db(db_name=settings.MONGO_DB_NAME)
             collection = db.users
             query = {'id': user_id}, {'$push': {'comics': comic}}
             results = collection.update_one({'id': user_id},
@@ -82,7 +82,7 @@ class MongoWorkerRepository(DBRepository):
         init_time = time.perf_counter()
 
         with self.session_factory() as session:
-            db = session.get_db(db_name='movie_store_users')
+            db = session.get_db(db_name=settings.MONGO_DB_NAME)
             collection = db.users
             query = {'id': user_id}
             results = collection.find_one(query)

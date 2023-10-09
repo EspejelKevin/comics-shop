@@ -1,9 +1,9 @@
 import autodynatrace
 import container
 from shared.infrastructure import WorkerResponse
-from worker.application import (ReadinessUsecase, RelatedComicsUsecase,
-                                UpdateCacheUsecase)
-from worker.domain import ComicInput
+from worker.application import (GetRelatedComicsUsecase, ReadinessUsecase,
+                                RelatedComicsUsecase, UpdateCacheUsecase)
+from worker.domain import ComicInput, Filter
 
 
 class WorkerController:
@@ -28,4 +28,12 @@ class WorkerController:
         with container.SingletonContainer.scope() as app:
             use_case: RelatedComicsUsecase = app.use_cases.related_comics()
             data = use_case.execute(comic_input, token)
+            return WorkerResponse(content=data)
+
+    @staticmethod
+    @autodynatrace.trace('WorkerController - get_related_comics')
+    def get_related_comics(filter: Filter, token: str):
+        with container.SingletonContainer.scope() as app:
+            use_case: GetRelatedComicsUsecase = app.use_cases.get_related_comics()
+            data = use_case.execute(filter, token)
             return WorkerResponse(content=data)
